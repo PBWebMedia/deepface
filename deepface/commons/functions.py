@@ -90,7 +90,7 @@ def load_image(img):
     return img
 
 
-def detect_faces(img, enforce_detection=True, detector_backend='opencv', align=True):
+def detect_faces(img, detector_backend='opencv', align=True, on_missing_face='enforce'):
     # img might be path, base64 or numpy array. Convert it to numpy whatever it is.
     img = load_image(img)
 
@@ -113,16 +113,18 @@ def detect_faces(img, enforce_detection=True, detector_backend='opencv', align=T
         faces = []
 
     if len(faces) == 0:
-        if not enforce_detection:
+        if on_missing_face == 'skip':
+            return []
+        elif on_missing_face == 'enforce':
+            faces = [(img, [0, 0, img.shape[0], img.shape[1]])]  # Set whole image as the detected face
+        elif on_missing_face == 'error':
             raise ValueError(
                 "No face could be detected. Please confirm that the picture is a face photo or consider "
                 "to set enforce_detection param to False.")
-        else:
-            faces = [(img, [0, 0, img.shape[0], img.shape[1]])]  # Set whole image as the detected face
 
     for img, region in faces:
-        if (img.shape[0] == 0 or img.shape[1] == 0) and enforce_detection:
-            raise ValueError(f'Detected face shape is {img.shape}, Consider to set enforce_detection argument to False.')
+        if (img.shape[0] == 0 or img.shape[1] == 0) and on_missing_face == 'enforce':
+            raise ValueError(f'Detected face shape is {img.shape}, Consider to set on_missing_face argument to \'skip\'.')
 
     return faces
 
@@ -178,7 +180,9 @@ def preprocess_face(img, target_size=(224, 224), grayscale=False, enforce_detect
     img = load_image(img)
     base_img = img.copy()
 
-    detected_faces = detect_faces(img=img, enforce_detection=enforce_detection, detector_backend=detector_backend, align=align)
+    on_missing_face = 'enforce' if enforce_detection else 'error'
+
+    detected_faces = detect_faces(img=img, on_missing_face=on_missing_face, detector_backend=detector_backend, align=align)
 
     # only take first detected face
     img, region = detected_faces[0]

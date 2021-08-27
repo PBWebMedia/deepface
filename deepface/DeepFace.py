@@ -265,7 +265,7 @@ def verify(img1_path, img2_path = '', model_name = 'VGG-Face', distance_metric =
 
 		return resp_obj
 
-def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {}, enforce_detection = True, detector_backend = 'opencv', prog_bar = True, enable_multiple=False):
+def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {}, detector_backend = 'opencv', prog_bar = True, enable_multiple=False, on_missing_face = 'enforce'):
 
 	"""
 	This function analyzes facial attributes including age, gender, emotion and race
@@ -283,14 +283,19 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 			models['emotion'] = DeepFace.build_model('Emotion')
 			models['race'] = DeepFace.build_model('race')
 
-		enforce_detection (boolean): The function throws exception if a face could not be detected. Set this to True if you don't want to get exception. This might be convenient for low resolution images.
-
 		detector_backend (string): set face detector backend as retinaface, mtcnn, opencv, ssd or dlib.
 
 		prog_bar (boolean): enable/disable a progress bar
 
 		enable_multiple (boolean): whether to allow detecting multiple faces. If this is set to True, the output will
 								   contain all analyses for every face in found in the input.
+
+		on_missing_face (string): Sets the detection behavior in case no face could be detected.
+		Must be one of (other values will raise a ValueError):
+			'skip':    will return an empty result object if no face can be found.
+			'enforce': will use the whole image as the default first face and will run analysis on this.
+			'error':   will raise an error if a face can not be detected.
+
 	Returns:
 		The function returns a dictionary. If img_path is a list, then it will return list of dictionary.
 		If enable_multiple is set, each face within each image will have a separate result set.
@@ -321,6 +326,9 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 		}
 
 	"""
+
+	if on_missing_face not in ['skip', 'enforce', 'error']:
+		raise ValueError("Invalid value given for on_missing_face. Must be one of 'skip', 'enforce' or 'error'.")
 
 	img_paths, bulkProcess = functions.initialize_input(img_path)
 
@@ -369,9 +377,9 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 	for j in global_pbar:
 		img_path = img_paths[j]
 
-		faces = functions.detect_faces(img=img_path, enforce_detection=enforce_detection, detector_backend=detector_backend)
+		faces = functions.detect_faces(img=img_path, detector_backend=detector_backend, on_missing_face=on_missing_face)
 
-		num_faces = 1 if not enable_multiple else len(faces)
+		num_faces = min(len(faces), 1) if not enable_multiple else len(faces)
 		num_actions = len(actions)
 		num_checks = num_actions * num_faces
 		disable_option = num_checks <= 1 or not prog_bar
@@ -450,7 +458,8 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 
 	if not enable_multiple:
 		for i, resp_object in enumerate(resp_objects):
-			resp_objects[i] = resp_object['face_1']
+			if 'face_1' in resp_object:
+				resp_objects[i] = resp_object['face_1']
 
 	if bulkProcess:
 		result = {}
