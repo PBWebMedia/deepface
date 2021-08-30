@@ -48,7 +48,7 @@ def build_model(model_name):
 		'Dlib': DlibWrapper.loadModel,
 		'ArcFace': ArcFace.loadModel,
 		'Emotion': Emotion.loadModel,
-		'Age': Age.Age(),
+		'Age': Age.Age,
 		'Gender': Gender.loadModel,
 		'Race': Race.loadModel
 	}
