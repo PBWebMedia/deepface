@@ -282,8 +282,7 @@ def analysis(db_path, model_name = 'VGG-Face', detector_backend = 'opencv', dist
 
 							face_224 = functions.preprocess_face(img = custom_face, target_size = (224, 224), grayscale = False, enforce_detection = False, detector_backend = 'opencv')
 
-							age_predictions = age_model.predict(face_224)[0,:]
-							apparent_age = Age.findApparentAge(age_predictions)
+							apparent_age = Age.predict(age_model, face_224)
 
 							#-------------------------------
 

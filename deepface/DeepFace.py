@@ -48,7 +48,7 @@ def build_model(model_name):
 		'Dlib': DlibWrapper.loadModel,
 		'ArcFace': ArcFace.loadModel,
 		'Emotion': Emotion.loadModel,
-		'Age': Age.loadModel,
+		'Age': Age.Age(),
 		'Gender': Gender.loadModel,
 		'Race': Race.loadModel
 	}
@@ -421,8 +421,7 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 			elif action == 'age':
 				img, _ = functions.reshape_face(img=face_img.copy(), region=face_region.copy(), target_size=(224, 224), grayscale=False)
 
-				age_predictions = models['age'].predict(img)[0,:]
-				apparent_age = Age.findApparentAge(age_predictions)
+				apparent_age = models['age'].predict(img)
 
 				face_response_obj[face]["age"] = int(apparent_age) #int cast is for the exception - object of type 'float32' is not JSON serializable
 
