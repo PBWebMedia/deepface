@@ -403,7 +403,7 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 
 			if action == 'emotion':
 				emotion_labels = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
-				img, region = functions.reshape_face(img=face_img.copy(), region=face_region.copy(), target_size=(48, 48), grayscale=True)
+				img = functions.reshape_face(img=face_img.copy(), target_size=(48, 48), grayscale=True)
 
 				emotion_predictions = models['emotion'].predict(img)[0,:]
 
@@ -419,14 +419,14 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 				face_response_obj[face]["dominant_emotion"] = emotion_labels[np.argmax(emotion_predictions)]
 
 			elif action == 'age':
-				img, _ = functions.reshape_face(img=face_img.copy(), region=face_region.copy(), target_size=(224, 224), grayscale=False)
+				img = functions.reshape_face(img=face_img.copy(), target_size=(224, 224), grayscale=False)
 
 				apparent_age = models['age'].predict(img)
 
-				face_response_obj[face]["age"] = int(apparent_age) #int cast is for the exception - object of type 'float32' is not JSON serializable
+				face_response_obj[face]["age"] = apparent_age
 
 			elif action == 'gender':
-				img, _ = functions.reshape_face(img=face_img.copy(), region=face_region.copy(), target_size=(224, 224), grayscale=False)
+				img = functions.reshape_face(img=face_img.copy(), target_size=(224, 224), grayscale=False)
 
 				gender_prediction = models['gender'].predict(img)[0,:]
 
@@ -438,7 +438,7 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 				face_response_obj[face]["gender"] = gender
 
 			elif action == 'race':
-				img, _ = functions.reshape_face(img=face_img.copy(), region=face_region.copy(), target_size=(224, 224), grayscale=False) #just emotion model expects grayscale images
+				img = functions.reshape_face(img=face_img.copy(), target_size=(224, 224), grayscale=False) #just emotion model expects grayscale images
 				race_predictions = models['race'].predict(img)[0,:]
 				race_labels = ['asian', 'indian', 'black', 'white', 'middle eastern', 'latino hispanic']
 

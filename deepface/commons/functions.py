@@ -185,15 +185,15 @@ def preprocess_face(img, target_size=(224, 224), grayscale=False, enforce_detect
     detected_faces = detect_faces(img=img, on_missing_face=on_missing_face, detector_backend=detector_backend, align=align)
 
     # only take first detected face
-    img, region = detected_faces[0]
+    img, _ = detected_faces[0]
     if img.shape[0] == 0 or img.shape[1] == 0:
         img = base_img.copy()
 
-    img, _ = reshape_face(img, region, target_size, grayscale)
+    img = reshape_face(img, target_size, grayscale)
     return img
 
 
-def reshape_face(img, region, target_size=(224, 224), grayscale=False):
+def reshape_face(img, target_size=(224, 224), grayscale=False):
     if grayscale == True:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -233,7 +233,7 @@ def reshape_face(img, region, target_size=(224, 224), grayscale=False):
 
     # ---------------------------------------------------
 
-    return img_pixels, region
+    return img_pixels
 
 
 def find_input_shape(model):
