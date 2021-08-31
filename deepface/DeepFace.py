@@ -419,9 +419,7 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 				face_response_obj[face]["dominant_emotion"] = emotion_labels[np.argmax(emotion_predictions)]
 
 			elif action == 'age':
-				img = functions.reshape_face(img=face_img.copy(), target_size=(224, 224), grayscale=False)
-
-				apparent_age = models['age'].predict(img)
+				apparent_age = models['age'].predict(face_img.copy())
 
 				face_response_obj[face]["age"] = apparent_age
 

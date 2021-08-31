@@ -54,6 +54,8 @@ class Age:
         self.model = age_model
 
     def predict(self, img):
+        img = functions.reshape_face(img=img, target_size=(224, 224), grayscale=False)
+
         age_predictions = self.model.predict(img)[0, :]
         output_indexes = np.array([i for i in range(0, 101)])
         apparent_age = np.sum(age_predictions * output_indexes)
