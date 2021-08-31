@@ -1,6 +1,3 @@
-import gdown
-from pathlib import Path
-import os
 import cv2
 import pandas as pd
 
@@ -8,34 +5,12 @@ from deepface.detectors import OpenCvWrapper
 from deepface.commons import functions
 
 def build_model():
-
-	home = functions.get_deepface_home()
-
-	#model structure
-	if os.path.isfile(home+'/.deepface/weights/deploy.prototxt') != True:
-
-		print("deploy.prototxt will be downloaded...")
-
-		url = "https://github.com/opencv/opencv/raw/3.4.0/samples/dnn/face_detector/deploy.prototxt"
-
-		output = home+'/.deepface/weights/deploy.prototxt'
-
-		gdown.download(url, output, quiet=False)
-
-	#pre-trained weights
-	if os.path.isfile(home+'/.deepface/weights/res10_300x300_ssd_iter_140000.caffemodel') != True:
-
-		print("res10_300x300_ssd_iter_140000.caffemodel will be downloaded...")
-
-		url = "https://github.com/opencv/opencv_3rdparty/raw/dnn_samples_face_detector_20170830/res10_300x300_ssd_iter_140000.caffemodel"
-
-		output = home+'/.deepface/weights/res10_300x300_ssd_iter_140000.caffemodel'
-
-		gdown.download(url, output, quiet=False)
+	prototxt_path = functions.download("https://github.com/opencv/opencv/raw/3.4.0/samples/dnn/face_detector/deploy.prototxt", 'ssd.prototxt')
+	caffemodel_path = functions.download("https://github.com/opencv/opencv_3rdparty/raw/dnn_samples_face_detector_20170830/res10_300x300_ssd_iter_140000.caffemodel", 'ssd.caffemodel')
 
 	face_detector = cv2.dnn.readNetFromCaffe(
-		home+"/.deepface/weights/deploy.prototxt",
-		home+"/.deepface/weights/res10_300x300_ssd_iter_140000.caffemodel"
+		prototxt_path,
+		caffemodel_path,
 	)
 
 	eye_detector = OpenCvWrapper.build_cascade("haarcascade_eye")

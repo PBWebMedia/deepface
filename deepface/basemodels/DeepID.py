@@ -1,8 +1,3 @@
-import os
-from pathlib import Path
-import gdown
-import zipfile
-
 from tensorflow import keras
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Conv2D, Activation, Input, Add, MaxPooling2D, Flatten, Dense, Dropout
@@ -43,14 +38,7 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 
 	#---------------------------------
 
-	home = functions.get_deepface_home()
-
-	if os.path.isfile(home+'/.deepface/weights/deepid_keras_weights.h5') != True:
-		print("deepid_keras_weights.h5 will be downloaded...")
-
-		output = home+'/.deepface/weights/deepid_keras_weights.h5'
-		gdown.download(url, output, quiet=False)
-
-	model.load_weights(home+'/.deepface/weights/deepid_keras_weights.h5')
+	weights_path = functions.download(url, 'deepid_keras_weights.h5')
+	model.load_weights(weights_path)
 
 	return model

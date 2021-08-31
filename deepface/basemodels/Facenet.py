@@ -1,8 +1,3 @@
-import os
-from pathlib import Path
-import gdown
-from functools import partial
-
 from deepface.commons import functions
 
 import tensorflow as tf
@@ -557,17 +552,8 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 
 	#-----------------------------------
 
-	home = functions.get_deepface_home()
-
-	if os.path.isfile(home+'/.deepface/weights/facenet_weights.h5') != True:
-		print("facenet_weights.h5 will be downloaded...")
-
-		output = home+'/.deepface/weights/facenet_weights.h5'
-		gdown.download(url, output, quiet=False)
-
-	#-----------------------------------
-
-	model.load_weights(home+'/.deepface/weights/facenet_weights.h5')
+	weights_path = functions.download(url, 'facenet_weights.h5')
+	model.load_weights(weights_path)
 
 	#-----------------------------------
 

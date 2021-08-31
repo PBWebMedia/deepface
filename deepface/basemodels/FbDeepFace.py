@@ -1,8 +1,3 @@
-import os
-from pathlib import Path
-import gdown
-import zipfile
-
 from tensorflow import keras
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Convolution2D, LocallyConnected2D, MaxPooling2D, Flatten, Dense, Dropout
@@ -25,21 +20,9 @@ def loadModel(url = 'https://github.com/swghosh/DeepFace/releases/download/weigh
 	base_model.add(Dense(8631, activation='softmax', name='F8'))
 	
 	#---------------------------------
-	
-	home = functions.get_deepface_home()
-	
-	if os.path.isfile(home+'/.deepface/weights/VGGFace2_DeepFace_weights_val-0.9034.h5') != True:
-		print("VGGFace2_DeepFace_weights_val-0.9034.h5 will be downloaded...")
-		
-		output = home+'/.deepface/weights/VGGFace2_DeepFace_weights_val-0.9034.h5.zip'
-		
-		gdown.download(url, output, quiet=False)
-		
-		#unzip VGGFace2_DeepFace_weights_val-0.9034.h5.zip
-		with zipfile.ZipFile(output, 'r') as zip_ref:
-			zip_ref.extractall(home+'/.deepface/weights/')
-		
-	base_model.load_weights(home+'/.deepface/weights/VGGFace2_DeepFace_weights_val-0.9034.h5')	
+
+	weights_path = functions.download(url, 'VGGFace2_DeepFace_weights_val-0.9034.h5.zip', unzip=True)
+	base_model.load_weights(weights_path)
 	
 	#drop F8 and D0. F7 is the representation layer.
 	deepface_model = Model(inputs=base_model.layers[0].input, outputs=base_model.layers[-3].output)

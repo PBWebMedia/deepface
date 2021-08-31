@@ -1,4 +1,6 @@
+import hashlib
 import os
+import zipfile
 
 import gdown
 import numpy as np
@@ -267,7 +269,7 @@ def find_input_shape(model):
     return input_shape
 
 
-def download(url, filename):
+def download(url, filename, md5_checksum=None, unzip=False):
     home = get_deepface_home()
 
     target_path = join(home, '.deepface/weights/', filename)
@@ -276,5 +278,24 @@ def download(url, filename):
         print(f'[{filename}] will be downloaded...')
 
         gdown.download(url, target_path, quiet=False)
+
+        # Optionally check MD5 checksum
+        if isinstance(md5_checksum, str):
+            file_hash = hashlib.md5()
+            with open(target_path, 'rb') as f:
+                chunk = f.read(8192)
+                while chunk:
+                    file_hash.update(chunk)
+                    chunk = f.read(8192)
+
+            if file_hash.hexdigest() != md5_checksum:
+                os.remove(target_path)
+                raise Exception(f'Checksum for [{target_path}] does not match: someone might have been tampering with a file you\'re trying to download!')
+
+        # Optionally unzip
+        if unzip:
+            with zipfile.ZipFile(target_path, 'r') as zip_ref:
+                zip_ref.extractall(join(home, '.deepface/weights/'))
+                target_path = os.path.splitext(target_path)[0] # remove extension
 
     return target_path

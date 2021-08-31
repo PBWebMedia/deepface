@@ -6,10 +6,6 @@ from tensorflow.python.lib.io import file_io
 import tensorflow
 from tensorflow import keras
 
-import os
-from pathlib import Path
-import gdown
-
 from deepface.commons import functions
 
 #url = "https://drive.google.com/uc?id=1LVB3CdVejpmGHM28BpqqkbZP5hDEcdZY"
@@ -28,19 +24,8 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 	#---------------------------------------
 	#check the availability of pre-trained weights
 
-	home = functions.get_deepface_home()
-
-	file_name = "arcface_weights.h5"
-	output = home+'/.deepface/weights/'+file_name
-
-	if os.path.isfile(output) != True:
-
-		print(file_name," will be downloaded to ",output)
-		gdown.download(url, output, quiet=False)
-
-	#---------------------------------------
-	
-	model.load_weights(output)
+	weights_path = functions.download(url, 'arcface_weights.h5')
+	model.load_weights(weights_path)
 
 	return model
 

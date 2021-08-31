@@ -15,8 +15,8 @@ class AgeBucket:
             prototxt_url="https://github.com/GilLevi/AgeGenderDeepLearning/raw/master/age_net_definitions/deploy.prototxt",
             caffemodel_url="https://github.com/GilLevi/AgeGenderDeepLearning/raw/master/models/age_net.caffemodel"
     ):
-        prototxt_path = functions.download(prototxt_url, 'age_bucket.prototxt')
-        caffemodel_path = functions.download(caffemodel_url, 'age_bucket.caffemodel')
+        prototxt_path = functions.download(prototxt_url, 'age_bucket.prototxt', md5_checksum='92d9433d69c1a8b9304061b147e4891a')
+        caffemodel_path = functions.download(caffemodel_url, 'age_bucket.caffemodel', md5_checksum='06ac391358d85e5fc999fff5fa404d14')
 
         self.model = cv2.dnn.readNetFromCaffe(
             prototxt_path,

@@ -1,10 +1,5 @@
 from deepface import DeepFace
 from tqdm import tqdm
-import os
-from os import path
-from pathlib import Path
-import numpy as np
-import gdown
 from deepface.commons import functions, distance as dst
 
 def loadModel():
@@ -43,17 +38,9 @@ def build_gbm():
 	
 	#this is not a must dependency
 	import lightgbm as lgb #lightgbm==2.3.1
-	
-	home = functions.get_deepface_home()
-	
-	if os.path.isfile(home+'/.deepface/weights/face-recognition-ensemble-model.txt') != True:
-		print("face-recognition-ensemble-model.txt will be downloaded...")
-		url = 'https://raw.githubusercontent.com/serengil/deepface/master/deepface/models/face-recognition-ensemble-model.txt'
-		output = home+'/.deepface/weights/face-recognition-ensemble-model.txt'
-		gdown.download(url, output, quiet=False)
-		
-	ensemble_model_path = home+'/.deepface/weights/face-recognition-ensemble-model.txt'
-	
-	deepface_ensemble = lgb.Booster(model_file = ensemble_model_path)
+
+	model_path = functions.download('https://raw.githubusercontent.com/serengil/deepface/master/deepface/models/face-recognition-ensemble-model.txt', 'face-recognition-ensemble-model.txt')
+
+	deepface_ensemble = lgb.Booster(model_file = model_path)
 	
 	return deepface_ensemble
