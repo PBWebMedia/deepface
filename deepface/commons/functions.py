@@ -297,7 +297,6 @@ def download(url, filename, md5_checksum=None, unzip=False):
     # Optionally unzip
     if unzip:
         file, ext = os.path.splitext(target_path)
-        target_path = file
         if not isfile(target_path):
             print(f'unzipping [{target_path}] to [{file}]...')
             if ext == '.zip':
@@ -307,5 +306,6 @@ def download(url, filename, md5_checksum=None, unzip=False):
                 zf = bz2.BZ2File(target_path)
                 data = zf.read()
                 open(file, 'wb').write(data)
+        target_path = file
 
     return target_path
