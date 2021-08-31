@@ -1,8 +1,4 @@
 from deepface.basemodels import VGGFace
-import os
-from pathlib import Path
-import gdown
-import numpy as np
 
 from deepface.commons import functions
 
@@ -38,15 +34,8 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 
 	#load weights
 
-	home = functions.get_deepface_home()
-
-	if os.path.isfile(home+'/.deepface/weights/gender_model_weights.h5') != True:
-		print("gender_model_weights.h5 will be downloaded...")
-
-		output = home+'/.deepface/weights/gender_model_weights.h5'
-		gdown.download(url, output, quiet=False)
-
-	gender_model.load_weights(home+'/.deepface/weights/gender_model_weights.h5')
+	weights_path = functions.download(url, 'gender_model_weights.h5')
+	gender_model.load_weights(weights_path)
 
 	return gender_model
 

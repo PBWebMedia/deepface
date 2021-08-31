@@ -1,8 +1,3 @@
-import os
-import gdown
-from pathlib import Path
-import zipfile
-
 from deepface.commons import functions
 
 import tensorflow as tf
@@ -18,6 +13,15 @@ elif tf_version == 2:
 	from tensorflow.keras.layers import Conv2D, MaxPooling2D, AveragePooling2D, Flatten, Dense, Dropout
 
 #url = 'https://drive.google.com/uc?id=13iUHHP3SlNg53qSuQZDdHDSDNdBP9nwy'
+"""
+#google drive source downloads zip
+output = home+'/.deepface/weights/facial_expression_model_weights.zip'
+gdown.download(url, output, quiet=False)
+
+#unzip facial_expression_model_weights.zip
+with zipfile.ZipFile(output, 'r') as zip_ref:
+	zip_ref.extractall(home+'/.deepface/weights/')
+"""
 
 def loadModel(url = 'https://github.com/serengil/deepface_models/releases/download/v1.0/facial_expression_model_weights.h5'):
 
@@ -51,24 +55,7 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 
 	#----------------------------
 
-	home = functions.get_deepface_home()
-
-	if os.path.isfile(home+'/.deepface/weights/facial_expression_model_weights.h5') != True:
-		print("facial_expression_model_weights.h5 will be downloaded...")
-
-		output = home+'/.deepface/weights/facial_expression_model_weights.h5'
-		gdown.download(url, output, quiet=False)
-
-		"""
-		#google drive source downloads zip
-		output = home+'/.deepface/weights/facial_expression_model_weights.zip'
-		gdown.download(url, output, quiet=False)
-
-		#unzip facial_expression_model_weights.zip
-		with zipfile.ZipFile(output, 'r') as zip_ref:
-			zip_ref.extractall(home+'/.deepface/weights/')
-		"""
-
-	model.load_weights(home+'/.deepface/weights/facial_expression_model_weights.h5')
+	weights_path = functions.download(url, 'facial_expression_model_weights.h5')
+	model.load_weights(weights_path)
 
 	return model

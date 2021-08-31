@@ -1,6 +1,4 @@
 from deepface.basemodels import VGGFace
-import os
-import gdown
 import numpy as np
 
 from deepface.commons import functions
@@ -41,15 +39,8 @@ class Age:
 
         # load weights
 
-        home = functions.get_deepface_home()
-
-        if os.path.isfile(home + '/.deepface/weights/age_model_weights.h5') != True:
-            print("age_model_weights.h5 will be downloaded...")
-
-            output = home + '/.deepface/weights/age_model_weights.h5'
-            gdown.download(url, output, quiet=False)
-
-        age_model.load_weights(home + '/.deepface/weights/age_model_weights.h5')
+        weights_path = functions.download(url, 'age_model_weights.h5')
+        age_model.load_weights(weights_path)
 
         self.model = age_model
 

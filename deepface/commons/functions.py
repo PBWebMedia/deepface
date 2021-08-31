@@ -1,8 +1,11 @@
 import os
+
+import gdown
 import numpy as np
 import cv2
 import base64
 from pathlib import Path
+from os.path import isfile, join
 
 from deepface.detectors import FaceDetector
 
@@ -262,3 +265,16 @@ def find_input_shape(model):
         input_shape = tuple(input_shape)
 
     return input_shape
+
+
+def download(url, filename):
+    home = get_deepface_home()
+
+    target_path = join(home, '.deepface/weights/', filename)
+
+    if not isfile(target_path):
+        print(f'[{filename}] will be downloaded...')
+
+        gdown.download(url, target_path, quiet=False)
+
+    return target_path

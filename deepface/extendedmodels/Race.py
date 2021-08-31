@@ -1,11 +1,5 @@
 from deepface.basemodels import VGGFace
 
-import os
-from pathlib import Path
-import gdown
-import numpy as np
-import zipfile
-
 from deepface.commons import functions
 
 import tensorflow as tf
@@ -19,6 +13,16 @@ elif tf_version == 2:
 	from tensorflow.keras.layers import Convolution2D, Flatten, Activation
 
 #url = 'https://drive.google.com/uc?id=1nz-WDhghGQBC4biwShQ9kYjvQMpO6smj'
+"""
+#google drive source downloads zip
+output = home+'/.deepface/weights/race_model_single_batch.zip'
+gdown.download(url, output, quiet=False)
+
+#unzip race_model_single_batch.zip
+with zipfile.ZipFile(output, 'r') as zip_ref:
+	zip_ref.extractall(home+'/.deepface/weights/')
+"""
+
 
 def loadModel(url = 'https://github.com/serengil/deepface_models/releases/download/v1.0/race_model_single_batch.h5'):
 
@@ -40,25 +44,8 @@ def loadModel(url = 'https://github.com/serengil/deepface_models/releases/downlo
 
 	#load weights
 
-	home = functions.get_deepface_home()
-
-	if os.path.isfile(home+'/.deepface/weights/race_model_single_batch.h5') != True:
-		print("race_model_single_batch.h5 will be downloaded...")
-
-		output = home+'/.deepface/weights/race_model_single_batch.h5'
-		gdown.download(url, output, quiet=False)
-
-		"""
-		#google drive source downloads zip
-		output = home+'/.deepface/weights/race_model_single_batch.zip'
-		gdown.download(url, output, quiet=False)
-
-		#unzip race_model_single_batch.zip
-		with zipfile.ZipFile(output, 'r') as zip_ref:
-			zip_ref.extractall(home+'/.deepface/weights/')
-		"""
-
-	race_model.load_weights(home+'/.deepface/weights/race_model_single_batch.h5')
+	weights_path = functions.download(url, 'race_model_single_batch.h5')
+	race_model.load_weights(weights_path)
 
 	return race_model
 
