@@ -297,7 +297,7 @@ def download(url, filename, md5_checksum=None, unzip=False):
     # Optionally unzip
     if unzip:
         file, ext = os.path.splitext(target_path)
-        if not isfile(target_path):
+        if not isfile(file):
             print(f'unzipping [{target_path}] to [{file}]...')
             if ext == '.zip':
                 with zipfile.ZipFile(target_path, 'r') as zip_ref:
