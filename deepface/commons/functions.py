@@ -291,20 +291,21 @@ def download(url, filename, md5_checksum=None, unzip=False):
 
             if file_hash.hexdigest() != md5_checksum:
                 os.remove(target_path)
-                raise Exception(f'Checksum for [{target_path}] does not match: someone might have been tampering with a file you\'re trying to download!')
+                raise Exception(f'Checksum for [{target_path}] does not match: someone might have been tampering with '
+                                f'a file you\'re trying to download!')
 
-        # Optionally unzip
-        if unzip:
-            file, ext = os.path.splitext(target_path)
+    # Optionally unzip
+    if unzip:
+        file, ext = os.path.splitext(target_path)
+        target_path = file
+        if not isfile(target_path):
             print(f'unzipping [{target_path}] to [{file}]...')
             if ext == '.zip':
                 with zipfile.ZipFile(target_path, 'r') as zip_ref:
                     zip_ref.extractall(join(home, '.deepface/weights/'))
-                    target_path = file
             elif ext == '.bz2':
                 zf = bz2.BZ2File(target_path)
                 data = zf.read()
                 open(file, 'wb').write(data)
-                target_path = file
 
     return target_path
