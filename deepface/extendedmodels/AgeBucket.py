@@ -1,5 +1,4 @@
 import cv2
-from matplotlib import pyplot as plt
 
 from deepface.commons import functions
 
@@ -27,10 +26,6 @@ class AgeBucket:
     def predict(self, img):
         img = img
 
-        print(img.shape)
-        plt.imshow(img[:, :, ::-1])
-        plt.show()
-
         imageBlob = cv2.dnn.blobFromImage(
             img,
             1.0,
@@ -41,11 +36,7 @@ class AgeBucket:
         self.model.setInput(imageBlob)
         predictions = self.model.forward()
 
-        print(predictions)
-
         i = predictions[0].argmax()
         age = AgeBucket.AGE_BUCKETS[i]
-        age_confidence = predictions[0][i]
-        print(f'{age}: {age_confidence}')
 
         return age
