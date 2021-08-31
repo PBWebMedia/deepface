@@ -271,14 +271,18 @@ def verify(img1_path, img2_path = '', model_name = 'VGG-Face', distance_metric =
 def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {}, detector_backend = 'opencv', prog_bar = True, enable_multiple=False, on_missing_face = 'enforce'):
 
 	"""
-	This function analyzes facial attributes including age, gender, emotion and race
+	This function analyzes facial attributes including age, gender, emotion and race.
+
+	You are free to pass additional models that implement a `predict` function, which will then also be run on the found faces.
 
 	Parameters:
 		img_path: exact image path, numpy array or base64 encoded image could be passed. If you are going to analyze lots of images, then set this to list. e.g. img_path = ['img1.jpg', 'img2.jpg']
 
-		actions (list): The default is ['age', 'gender', 'emotion', 'race']. You can drop some of those attributes.
+		actions (list): The default is ['age', 'gender', 'emotion', 'race']. You can drop some of those attributes or add others.
+						See DeepFace.build_model for the available prebuilt models.
 
 		models: facial attribute analysis models are built in every call of analyze function. You can pass pre-built models to speed the function up.
+			    You can also pass your own custom models here. These need to implement a predict function that takes the face image and returns a dictionary with the result data.
 
 			models = {}
 			models['age'] = DeepFace.build_model('age')
@@ -286,6 +290,7 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 			models['gender'] = DeepFace.build_model('gender')
 			models['emotion'] = DeepFace.build_model('emotion')
 			models['race'] = DeepFace.build_model('race')
+			models['custom'] = YourCustomModel
 
 		detector_backend (string): set face detector backend as retinaface, mtcnn, opencv, ssd or dlib.
 
@@ -383,21 +388,8 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 				for i, parameter in enumerate(['x', 'y', 'w', 'h']):
 					face_response_obj[face]["region"][parameter] = int(face_region[i])  # int cast is for the exception - object of type 'float32' is not JSON serializable
 
-			if action == 'emotion':
-				emotion_response = models['emotion'].predict(face_img.copy())
-				face_response_obj[face] = {**face_response_obj[face], **emotion_response}  # merge dicts
-
-			elif action == 'age':
-				age_response = models['age'].predict(face_img.copy())
-				face_response_obj[face] = {**face_response_obj[face], **age_response} # merge dicts
-
-			elif action == 'gender':
-				gender_response = models['gender'].predict(face_img.copy())
-				face_response_obj[face] = {**face_response_obj[face], **gender_response}  # merge dicts
-
-			elif action == 'race':
-				race_response = models['race'].predict(face_img.copy())
-				face_response_obj[face] = {**face_response_obj[face], **race_response} # merge dicts
+			action_response = models[action].predict(face_img.copy())
+			face_response_obj[face] = {**face_response_obj[face], **action_response}  # merge dicts
 
 		#---------------------------------
 		resp_objects.append(face_response_obj)
