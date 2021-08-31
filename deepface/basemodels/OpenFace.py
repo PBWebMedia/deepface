@@ -1,7 +1,3 @@
-import os
-from pathlib import Path
-import gdown
-
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.models import Model, Sequential

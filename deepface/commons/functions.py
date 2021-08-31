@@ -1,3 +1,4 @@
+import bz2
 import hashlib
 import os
 import zipfile
@@ -294,8 +295,16 @@ def download(url, filename, md5_checksum=None, unzip=False):
 
         # Optionally unzip
         if unzip:
-            with zipfile.ZipFile(target_path, 'r') as zip_ref:
-                zip_ref.extractall(join(home, '.deepface/weights/'))
-                target_path = os.path.splitext(target_path)[0] # remove extension
+            file, ext = os.path.splitext(target_path)
+            print(f'unzipping [{target_path}] to [{file}]...')
+            if ext == '.zip':
+                with zipfile.ZipFile(target_path, 'r') as zip_ref:
+                    zip_ref.extractall(join(home, '.deepface/weights/'))
+                    target_path = file
+            elif ext == '.bz2':
+                zf = bz2.BZ2File(target_path)
+                data = zf.read()
+                open(file, 'wb').write(data)
+                target_path = file
 
     return target_path

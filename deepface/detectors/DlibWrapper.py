@@ -1,33 +1,19 @@
 from pathlib import Path
-import gdown
-import bz2
-import os
 
 from deepface.commons import functions
 
 def build_model():
 
-	home = functions.get_deepface_home()
-
 	import dlib #this requirement is not a must that's why imported here
 
-	#check required file exists in the home/.deepface/weights folder
-	if os.path.isfile(home+'/.deepface/weights/shape_predictor_5_face_landmarks.dat') != True:
-
-		print("shape_predictor_5_face_landmarks.dat.bz2 is going to be downloaded")
-
-		url = "http://dlib.net/files/shape_predictor_5_face_landmarks.dat.bz2"
-		output = home+'/.deepface/weights/'+url.split("/")[-1]
-
-		gdown.download(url, output, quiet=False)
-
-		zipfile = bz2.BZ2File(output)
-		data = zipfile.read()
-		newfilepath = output[:-4] #discard .bz2 extension
-		open(newfilepath, 'wb').write(data)
+	landmarks_path = functions.download(
+		"http://dlib.net/files/shape_predictor_5_face_landmarks.dat.bz2",
+		"shape_predictor_5_face_landmarks.dat.bz2",
+		unzip=True
+	)
 
 	face_detector = dlib.get_frontal_face_detector()
-	sp = dlib.shape_predictor(home+"/.deepface/weights/shape_predictor_5_face_landmarks.dat")
+	sp = dlib.shape_predictor(landmarks_path)
 
 	detector = {}
 	detector["face_detector"] = face_detector
