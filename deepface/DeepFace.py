@@ -14,7 +14,7 @@ from tqdm import tqdm
 import pickle
 
 from deepface.basemodels import VGGFace, OpenFace, Facenet, Facenet512, FbDeepFace, DeepID, DlibWrapper, ArcFace, Boosting
-from deepface.extendedmodels import Age, Gender, Race, Emotion
+from deepface.extendedmodels import Age, Gender, Race, Emotion, AgeBucket
 from deepface.commons import functions, realtime, distance as dst
 
 import tensorflow as tf
@@ -38,19 +38,22 @@ def build_model(model_name):
 
 	global model_obj #singleton design pattern
 
+	model_name = model_name.lower()
+
 	models = {
-		'VGG-Face': VGGFace.loadModel,
-		'OpenFace': OpenFace.loadModel,
-		'Facenet': Facenet.loadModel,
-		'Facenet512': Facenet512.loadModel,
-		'DeepFace': FbDeepFace.loadModel,
-		'DeepID': DeepID.loadModel,
-		'Dlib': DlibWrapper.loadModel,
-		'ArcFace': ArcFace.loadModel,
-		'Emotion': Emotion.loadModel,
-		'Age': Age.Age,
-		'Gender': Gender.loadModel,
-		'Race': Race.loadModel
+		'vgg-face': VGGFace.loadModel,
+		'openface': OpenFace.loadModel,
+		'facenet': Facenet.loadModel,
+		'facenet512': Facenet512.loadModel,
+		'deepface': FbDeepFace.loadModel,
+		'deepid': DeepID.loadModel,
+		'dlib': DlibWrapper.loadModel,
+		'arcface': ArcFace.loadModel,
+		'emotion': Emotion.Emotion,
+		'age': Age.Age,
+		'age_bucket': AgeBucket.AgeBucket,
+		'gender': Gender.Gender,
+		'race': Race.Race
 	}
 
 	if not "model_obj" in globals():
@@ -278,9 +281,10 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 		models: facial attribute analysis models are built in every call of analyze function. You can pass pre-built models to speed the function up.
 
 			models = {}
-			models['age'] = DeepFace.build_model('Age')
-			models['gender'] = DeepFace.build_model('Gender')
-			models['emotion'] = DeepFace.build_model('Emotion')
+			models['age'] = DeepFace.build_model('age')
+			models['age_bucket'] = DeepFace.build_mode('age_bucket')
+			models['gender'] = DeepFace.build_model('gender')
+			models['emotion'] = DeepFace.build_model('emotion')
 			models['race'] = DeepFace.build_model('race')
 
 		detector_backend (string): set face detector backend as retinaface, mtcnn, opencv, ssd or dlib.
@@ -336,37 +340,15 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 
 	built_models = list(models.keys())
 
-	#---------------------------------
+	# Build all models that are not explicitly passed in
+	for action in actions:
+		if action not in built_models:
+			models[action] = build_model(action)
 
-	#pre-trained models passed but it doesn't exist in actions
-	if len(built_models) > 0:
-		if 'emotion' in built_models and 'emotion' not in actions:
-			actions.append('emotion')
-
-		if 'age' in built_models and 'age' not in actions:
-			actions.append('age')
-
-		if 'gender' in built_models and 'gender' not in actions:
-			actions.append('gender')
-
-		if 'race' in built_models and 'race' not in actions:
-			actions.append('race')
-
-	#---------------------------------
-
-	if 'emotion' in actions and 'emotion' not in built_models:
-		models['emotion'] = build_model('Emotion')
-
-	if 'age' in actions and 'age' not in built_models:
-		models['age'] = build_model('Age')
-
-	if 'gender' in actions and 'gender' not in built_models:
-		models['gender'] = build_model('Gender')
-
-	if 'race' in actions and 'race' not in built_models:
-		models['race'] = build_model('Race')
-
-	#---------------------------------
+	# Append to actions all models that were explicitly passed in
+	for model in built_models:
+		if model not in actions:
+			actions.append(model)
 
 	resp_objects = []
 
@@ -402,53 +384,20 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 					face_response_obj[face]["region"][parameter] = int(face_region[i])  # int cast is for the exception - object of type 'float32' is not JSON serializable
 
 			if action == 'emotion':
-				emotion_labels = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
-				img = functions.reshape_face(img=face_img.copy(), target_size=(48, 48), grayscale=True)
-
-				emotion_predictions = models['emotion'].predict(img)[0,:]
-
-				sum_of_predictions = emotion_predictions.sum()
-
-				face_response_obj[face]["emotion"] = {}
-
-				for i in range(0, len(emotion_labels)):
-					emotion_label = emotion_labels[i]
-					emotion_prediction = 100 * emotion_predictions[i] / sum_of_predictions
-					face_response_obj[face]["emotion"][emotion_label] = emotion_prediction
-
-				face_response_obj[face]["dominant_emotion"] = emotion_labels[np.argmax(emotion_predictions)]
+				emotion_response = models['emotion'].predict(face_img.copy())
+				face_response_obj[face] = {**face_response_obj[face], **emotion_response}  # merge dicts
 
 			elif action == 'age':
-				apparent_age = models['age'].predict(face_img.copy())
-
-				face_response_obj[face]["age"] = apparent_age
+				age_response = models['age'].predict(face_img.copy())
+				face_response_obj[face] = {**face_response_obj[face], **age_response} # merge dicts
 
 			elif action == 'gender':
-				img = functions.reshape_face(img=face_img.copy(), target_size=(224, 224), grayscale=False)
-
-				gender_prediction = models['gender'].predict(img)[0,:]
-
-				if np.argmax(gender_prediction) == 0:
-					gender = "Woman"
-				elif np.argmax(gender_prediction) == 1:
-					gender = "Man"
-
-				face_response_obj[face]["gender"] = gender
+				gender_response = models['gender'].predict(face_img.copy())
+				face_response_obj[face] = {**face_response_obj[face], **gender_response}  # merge dicts
 
 			elif action == 'race':
-				img = functions.reshape_face(img=face_img.copy(), target_size=(224, 224), grayscale=False) #just emotion model expects grayscale images
-				race_predictions = models['race'].predict(img)[0,:]
-				race_labels = ['asian', 'indian', 'black', 'white', 'middle eastern', 'latino hispanic']
-
-				sum_of_predictions = race_predictions.sum()
-
-				face_response_obj[face]["race"] = {}
-				for i in range(0, len(race_labels)):
-					race_label = race_labels[i]
-					race_prediction = 100 * race_predictions[i] / sum_of_predictions
-					face_response_obj[face]["race"][race_label] = race_prediction
-
-				face_response_obj[face]["dominant_race"] = race_labels[np.argmax(race_predictions)]
+				race_response = models['race'].predict(face_img.copy())
+				face_response_obj[face] = {**face_response_obj[face], **race_response} # merge dicts
 
 		#---------------------------------
 		resp_objects.append(face_response_obj)

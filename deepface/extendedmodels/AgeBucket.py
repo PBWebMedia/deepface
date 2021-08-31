@@ -39,4 +39,4 @@ class AgeBucket:
         i = predictions[0].argmax()
         age = AgeBucket.AGE_BUCKETS[i]
 
-        return age
+        return {'age_bucket': age}

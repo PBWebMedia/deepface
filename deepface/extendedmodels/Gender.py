@@ -1,3 +1,5 @@
+import numpy as np
+
 from deepface.basemodels import VGGFace
 
 from deepface.commons import functions
@@ -14,29 +16,41 @@ elif tf_version == 2:
 
 #url = 'https://drive.google.com/uc?id=1wUXRVlbsni2FN9-jkS_f4UTUrm1bRLyk'
 
-def loadModel(url = 'https://github.com/serengil/deepface_models/releases/download/v1.0/gender_model_weights.h5'):
 
-	model = VGGFace.baseModel()
+class Gender:
+	def __init__(self, url='https://github.com/serengil/deepface_models/releases/download/v1.0/gender_model_weights.h5'):
+		model = VGGFace.baseModel()
 
-	#--------------------------
+		#--------------------------
 
-	classes = 2
-	base_model_output = Sequential()
-	base_model_output = Convolution2D(classes, (1, 1), name='predictions')(model.layers[-4].output)
-	base_model_output = Flatten()(base_model_output)
-	base_model_output = Activation('softmax')(base_model_output)
+		classes = 2
+		base_model_output = Sequential()
+		base_model_output = Convolution2D(classes, (1, 1), name='predictions')(model.layers[-4].output)
+		base_model_output = Flatten()(base_model_output)
+		base_model_output = Activation('softmax')(base_model_output)
 
-	#--------------------------
+		#--------------------------
 
-	gender_model = Model(inputs=model.input, outputs=base_model_output)
+		gender_model = Model(inputs=model.input, outputs=base_model_output)
 
-	#--------------------------
+		#--------------------------
 
-	#load weights
+		#load weights
 
-	weights_path = functions.download(url, 'gender_model_weights.h5')
-	gender_model.load_weights(weights_path)
+		weights_path = functions.download(url, 'gender_model_weights.h5')
+		gender_model.load_weights(weights_path)
 
-	return gender_model
+		self.model = gender_model
 
-	#--------------------------
+	def predict(self, img):
+		img = functions.reshape_face(img=img, target_size=(224, 224), grayscale=False)
+
+		gender_prediction = self.model.predict(img)[0, :]
+
+		gender = 'Unknown'
+		if np.argmax(gender_prediction) == 0:
+			gender = 'Woman'
+		elif np.argmax(gender_prediction) == 1:
+			gender = 'Man'
+
+		return {'gender': gender}

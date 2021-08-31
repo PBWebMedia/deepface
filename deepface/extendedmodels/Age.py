@@ -50,4 +50,4 @@ class Age:
         age_predictions = self.model.predict(img)[0, :]
         output_indexes = np.array([i for i in range(0, 101)])
         apparent_age = np.sum(age_predictions * output_indexes)
-        return int(apparent_age)  #int cast is for the exception - object of type 'float32' is not JSON serializable
+        return {'age': int(apparent_age)}  #int cast is for the exception - object of type 'float32' is not JSON serializable
