@@ -13,3 +13,4 @@ lightgbm>=2.3.1
 dlib>=19.20.0
 retina-face>=0.0.1
 matplotlib==3.4.3
+onnxruntime==1.8.1
