@@ -268,7 +268,7 @@ def verify(img1_path, img2_path = '', model_name = 'VGG-Face', distance_metric =
 
 		return resp_obj
 
-def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {}, detector_backend = 'opencv', prog_bar = True, enable_multiple=False, on_missing_face = 'enforce'):
+def analyze(img_path, actions = ('emotion', 'age', 'gender', 'race') , models = None, detector_backend = 'opencv', prog_bar = True, enable_multiple = False, on_missing_face = 'enforce'):
 
 	"""
 	This function analyzes facial attributes including age, gender, emotion and race.
@@ -278,11 +278,11 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 	Parameters:
 		img_path: exact image path, numpy array or base64 encoded image could be passed. If you are going to analyze lots of images, then set this to list. e.g. img_path = ['img1.jpg', 'img2.jpg']
 
-		actions (list): The default is ['age', 'gender', 'emotion', 'race']. You can drop some of those attributes or add others.
+		actions (tuple): The default is ('age', 'gender', 'emotion', 'race'). You can drop some of those attributes or add others.
 						See DeepFace.build_model for the available prebuilt models.
 
-		models: facial attribute analysis models are built in every call of analyze function. You can pass pre-built models to speed the function up.
-			    You can also pass your own custom models here. These need to implement a predict function that takes the face image and returns a dictionary with the result data.
+		models: (Optional[dict]) facial attribute analysis models are built in every call of analyze function. You can pass pre-built models to speed the function up.
+				You can also pass your own custom models here. These need to implement a predict function that takes the face image and returns a dictionary with the result data.
 
 			models = {}
 			models['age'] = DeepFace.build_model('age')
@@ -338,6 +338,10 @@ def analyze(img_path, actions = ['emotion', 'age', 'gender', 'race'], models = {
 
 	if on_missing_face not in ['skip', 'enforce', 'error']:
 		raise ValueError("Invalid value given for on_missing_face. Must be one of 'skip', 'enforce' or 'error'.")
+
+	actions = list(actions)
+	if not models:
+		models = {}
 
 	img_paths, bulkProcess = functions.initialize_input(img_path)
 
